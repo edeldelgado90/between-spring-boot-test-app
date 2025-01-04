@@ -1,8 +1,12 @@
 # Compiled class file
 *.class
 
+#Generated files
+/target/
+
 # IntelliJ project files
 .idea/
+*.iml
 
 # Log file
 *.log
