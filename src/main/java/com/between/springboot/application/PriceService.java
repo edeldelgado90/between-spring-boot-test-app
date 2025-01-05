@@ -32,7 +32,7 @@ public class PriceService {
   }
 
   public Mono<Price> getCurrentPriceByProductAndBrand(
-      Long productId, Long brandId, LocalDateTime date) {
+          Long productId, Long brandId, LocalDateTime date) {
     Flux<Price> prices = priceRepository.getCurrentPriceByProductAndBrand(productId, brandId, date);
     return PriceCalculator.calculateCurrentPrice(prices)
         .switchIfEmpty(
