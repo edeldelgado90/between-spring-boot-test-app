@@ -1,7 +1,7 @@
 package com.between.springboot.application.mapper;
 
 import com.between.springboot.adapter.out.model.PriceEntity;
-import com.between.springboot.domain.Price;
+import com.between.springboot.domain.price.Price;
 import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")

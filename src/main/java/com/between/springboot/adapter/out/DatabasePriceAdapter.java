@@ -3,9 +3,12 @@ package com.between.springboot.adapter.out;
 import com.between.springboot.adapter.out.model.PriceEntity;
 import com.between.springboot.adapter.out.repository.PriceRepository;
 import com.between.springboot.application.mapper.PriceMapper;
-import com.between.springboot.domain.Price;
+import com.between.springboot.domain.price.Price;
 import com.between.springboot.port.out.DatabasePricePort;
 import java.time.LocalDateTime;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -29,14 +32,29 @@ public class DatabasePriceAdapter implements DatabasePricePort {
   }
 
   @Override
-  public Flux<Price> getPrices(Long productId, Long brandId, LocalDateTime date) {
-    return repository
-        .findByProductIdAndBrandIdAndDate(productId, brandId, date)
-        .map(mapper::toModel);
+  public Mono<Void> delete(Long id) {
+    return repository.deleteById(id);
   }
 
   @Override
-  public Mono<Void> delete(Long id) {
-    return repository.deleteById(id);
+  public Mono<Page<Price>> findAllBy(Pageable pageable) {
+    return this.repository
+        .findAllBy(pageable)
+        .map(mapper::toModel)
+        .collectList()
+        .flatMap(
+            prices ->
+                this.repository
+                    .count()
+                    .defaultIfEmpty(0L)
+                    .map(count -> new PageImpl<>(prices, pageable, count)));
+  }
+
+  @Override
+  public Flux<Price> getCurrentPriceByProductAndBrand(
+      Long productId, Long brandId, LocalDateTime date) {
+    return repository
+        .findByProductIdAndBrandIdAndDate(productId, brandId, date)
+        .map(mapper::toModel);
   }
 }
