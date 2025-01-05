@@ -1,10 +1,12 @@
-package com.between.springboot.domain;
+package com.between.springboot.domain.price;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import lombok.Builder;
 import lombok.Data;
 
 @Data
+@Builder
 public class Price {
   private Long id;
   private final Long brandId;

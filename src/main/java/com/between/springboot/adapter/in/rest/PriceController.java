@@ -1,13 +1,16 @@
 package com.between.springboot.adapter.in.rest;
 
 import com.between.springboot.application.PriceService;
-import com.between.springboot.domain.Price;
+import com.between.springboot.domain.price.Price;
+import com.between.springboot.domain.price.PriceNotFoundException;
 import com.between.springboot.port.in.rest.RestPricePort;
 import java.time.LocalDateTime;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
 
 @RestController

@@ -1,7 +1,8 @@
 package com.between.springboot.application;
 
-import com.between.springboot.domain.Price;
-import com.between.springboot.domain.PriceCalculator;
+import com.between.springboot.domain.price.Price;
+import com.between.springboot.domain.price.PriceCalculator;
+import com.between.springboot.domain.price.PriceNotFoundException;
 import com.between.springboot.port.out.DatabasePricePort;
 import java.time.LocalDateTime;
 import org.springframework.data.domain.Page;
@@ -33,6 +34,9 @@ public class PriceService {
   public Mono<Price> getCurrentPriceByProductAndBrand(
           Long productId, Long brandId, LocalDateTime date) {
     Flux<Price> prices = priceRepository.getCurrentPriceByProductAndBrand(productId, brandId, date);
-    return PriceCalculator.calculateCurrentPrice(prices);
+    return PriceCalculator.calculateCurrentPrice(prices)
+        .switchIfEmpty(
+            Mono.error(
+                new PriceNotFoundException("No price found for the given product and brand.")));
   }
 }

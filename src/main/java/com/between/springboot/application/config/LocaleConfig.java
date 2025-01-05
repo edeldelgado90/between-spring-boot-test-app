@@ -1,4 +1,4 @@
-package com.between.springboot.config;
+package com.between.springboot.application.config;
 
 import java.util.Locale;
 import org.springframework.context.annotation.Bean;
