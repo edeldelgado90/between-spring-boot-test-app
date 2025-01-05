@@ -8,16 +8,15 @@ package prices;
 import "google/protobuf/timestamp.proto";
 
 service PriceService {
-  rpc GetCurrentPrice(GetCurrentPriceRequest) returns (PriceResponse);
+  rpc getCurrentPriceByProductAndBrand(GetCurrentPriceByProductAndBrandRequest) returns (PriceResponse);
 }
 
-message GetCurrentPriceRequest {
+message GetCurrentPriceByProductAndBrandRequest {
   uint64 productId = 1;
   uint64 brandId = 2;
   google.protobuf.Timestamp date = 3;
 }
 
-// Respuesta con detalles del precio
 message PriceResponse {
   uint64 id = 1;
   uint64 brandId = 2;

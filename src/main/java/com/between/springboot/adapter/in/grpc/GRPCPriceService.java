@@ -1,7 +1,7 @@
 package com.between.springboot.adapter.in.grpc;
 
 import com.between.springboot.adapter.in.grpc.proto.PriceServiceGrpc;
-import com.between.springboot.adapter.in.grpc.proto.GetCurrentPriceRequest;
+import com.between.springboot.adapter.in.grpc.proto.GetCurrentPriceByProductAndBrandRequest;
 import com.between.springboot.adapter.in.grpc.proto.PriceResponse;
 import com.between.springboot.application.PriceService;
 import com.between.springboot.domain.Price;
@@ -22,13 +22,13 @@ public class GRPCPriceService extends PriceServiceGrpc.PriceServiceImplBase {
   }
 
   @Override
-  public void getCurrentPrice(
-      GetCurrentPriceRequest request, StreamObserver<PriceResponse> responseObserver) {
+  public void getCurrentPriceByProductAndBrand(
+          GetCurrentPriceByProductAndBrandRequest request, StreamObserver<PriceResponse> responseObserver) {
     Timestamp timestamp = request.getDate();
     Instant instant = Instant.ofEpochSecond(timestamp.getSeconds(), timestamp.getNanos());
     LocalDateTime date = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
     Mono<Price> currentPrice =
-        priceService.getCurrentPrice(request.getProductId(), request.getBrandId(), date);
+        priceService.getCurrentPriceByProductAndBrand(request.getProductId(), request.getBrandId(), date);
 
     currentPrice.subscribe(
         price -> {
