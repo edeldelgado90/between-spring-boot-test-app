@@ -4,6 +4,8 @@ import com.between.springboot.domain.Price;
 import com.between.springboot.domain.PriceCalculator;
 import com.between.springboot.port.out.DatabasePricePort;
 import java.time.LocalDateTime;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -24,8 +26,12 @@ public class PriceService {
     return priceRepository.delete(id);
   }
 
+  public Mono<Page<Price>> findAllBy(Pageable pageable) {
+    return priceRepository.findAllBy(pageable);
+  }
+
   public Mono<Price> getCurrentPriceByProductAndBrand(
-      Long productId, Long brandId, LocalDateTime date) {
+          Long productId, Long brandId, LocalDateTime date) {
     Flux<Price> prices = priceRepository.getCurrentPriceByProductAndBrand(productId, brandId, date);
     return PriceCalculator.calculateCurrentPrice(prices);
   }

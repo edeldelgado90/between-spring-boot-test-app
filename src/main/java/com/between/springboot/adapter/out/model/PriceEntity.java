@@ -2,12 +2,14 @@ package com.between.springboot.adapter.out.model;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import lombok.Builder;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
 
 @Data
-@Table(name = "PRICES")
+@Builder
+@Table(name = "prices")
 public class PriceEntity {
 
   @Id private Long id;
