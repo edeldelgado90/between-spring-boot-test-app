@@ -6,4 +6,6 @@ import reactor.core.publisher.Flux;
 
 public interface DatabasePricePort extends DatabasePort<Price> {
   Flux<Price> getCurrentPriceByProductAndBrand(Long productId, Long brandId, LocalDateTime date);
+
+  Flux<Price> findAllByProductIdAndBrandId(Long productId, Long brandId);
 }

@@ -17,4 +17,6 @@ public interface PriceRepository extends ReactiveCrudRepository<PriceEntity, Lon
       Long productId, Long brandId, LocalDateTime date);
 
   Flux<PriceEntity> findAllBy(Pageable pageable);
+
+  Flux<PriceEntity> findAllByProductIdAndBrandId(Long productId, Long brandId);
 }

@@ -57,4 +57,9 @@ public class DatabasePriceAdapter implements DatabasePricePort {
         .findByProductIdAndBrandIdAndDate(productId, brandId, date)
         .map(mapper::toModel);
   }
+
+  @Override
+  public Flux<Price> findAllByProductIdAndBrandId(Long productId, Long brandId) {
+    return repository.findAllByProductIdAndBrandId(productId, brandId).map(mapper::toModel);
+  }
 }
