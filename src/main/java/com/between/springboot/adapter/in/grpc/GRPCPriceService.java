@@ -1,19 +1,19 @@
 package com.between.springboot.adapter.in.grpc;
 
-import com.between.springboot.adapter.in.grpc.proto.PriceServiceGrpc;
 import com.between.springboot.adapter.in.grpc.proto.GetCurrentPriceByProductAndBrandRequest;
 import com.between.springboot.adapter.in.grpc.proto.PriceResponse;
+import com.between.springboot.adapter.in.grpc.proto.PriceServiceGrpc;
 import com.between.springboot.application.PriceService;
-import com.between.springboot.domain.Price;
+import com.between.springboot.domain.price.Price;
 import com.google.protobuf.Timestamp;
 import io.grpc.stub.StreamObserver;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import org.springframework.stereotype.Service;
+import net.devh.boot.grpc.server.service.GrpcService;
 import reactor.core.publisher.Mono;
 
-@Service
+@GrpcService
 public class GRPCPriceService extends PriceServiceGrpc.PriceServiceImplBase {
   private final PriceService priceService;
 

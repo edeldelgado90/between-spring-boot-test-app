@@ -3,10 +3,10 @@ package com.between.springboot.adapter.out;
 import com.between.springboot.adapter.out.model.PriceEntity;
 import com.between.springboot.adapter.out.repository.PriceRepository;
 import com.between.springboot.application.mapper.PriceMapper;
-import com.between.springboot.domain.Price;
+import com.between.springboot.domain.price.Price;
 import com.between.springboot.port.out.DatabasePricePort;
 import java.time.LocalDateTime;
-import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;

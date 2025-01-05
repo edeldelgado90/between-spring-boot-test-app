@@ -1,4 +1,4 @@
-package com.between.springboot.domain;
+package com.between.springboot.domain.price;
 
 import java.util.Comparator;
 import reactor.core.publisher.Flux;

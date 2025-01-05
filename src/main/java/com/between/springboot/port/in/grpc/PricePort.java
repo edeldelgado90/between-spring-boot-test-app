@@ -1,6 +1,6 @@
 package com.between.springboot.port.in.grpc;
 
-import com.between.springboot.domain.Price;
+import com.between.springboot.domain.price.Price;
 import java.time.LocalDateTime;
 import reactor.core.publisher.Mono;
 
