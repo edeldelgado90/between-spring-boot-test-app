@@ -6,7 +6,6 @@ import com.between.springboot.application.mapper.PriceMapper;
 import com.between.springboot.domain.price.Price;
 import com.between.springboot.port.out.DatabasePricePort;
 import java.time.LocalDateTime;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
