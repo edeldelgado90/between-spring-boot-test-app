@@ -22,6 +22,8 @@ spring:
     user: sa
     password:
     locations: classpath:db/migration
+    baseline-on-migrate: true
+    baseline-version: 1
   messages:
     basename: messages
     encoding: UTF-8
