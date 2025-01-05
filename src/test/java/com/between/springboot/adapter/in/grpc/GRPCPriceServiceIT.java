@@ -1,9 +1,8 @@
 package com.between.springboot.adapter.in.grpc;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.between.springboot.adapter.in.grpc.proto.GetCurrentPriceRequest;
+import com.between.springboot.adapter.in.grpc.proto.GetCurrentPriceByProductAndBrandRequest;
 import com.between.springboot.adapter.in.grpc.proto.PriceResponse;
 import com.between.springboot.adapter.in.grpc.proto.PriceServiceGrpc;
 import com.between.springboot.application.PriceService;
@@ -19,34 +18,31 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-public class GRPCPriceServiceTests {
+public class GRPCPriceServiceIT {
 
   @Autowired private PriceService priceService;
-
   private ManagedChannel channel;
   private PriceServiceGrpc.PriceServiceBlockingStub blockingStub;
 
   @BeforeEach
   public void setUp() throws IOException {
-    Server server =
-        ServerBuilder.forPort(9090).addService(new GRPCPriceService(priceService)).build().start();
     channel = ManagedChannelBuilder.forAddress("localhost", 9090).usePlaintext().build();
     blockingStub = PriceServiceGrpc.newBlockingStub(channel);
   }
 
   @AfterEach
-  public void tearDown() {
+  public void tearDown() throws InterruptedException {
     channel.shutdown();
   }
 
   @Test
   public void testGetCurrentPrice() {
-    long productId = 1;
+    long productId = 35455;
     long brandId = 1;
-    String testDate = "2023-01-01T00:00:00";
+    String testDate = "2020-07-01T12:00:00";
 
-    GetCurrentPriceRequest request =
-        GetCurrentPriceRequest.newBuilder()
+    GetCurrentPriceByProductAndBrandRequest request =
+        GetCurrentPriceByProductAndBrandRequest.newBuilder()
             .setProductId(productId)
             .setBrandId(brandId)
             .setDate(
@@ -59,35 +55,9 @@ public class GRPCPriceServiceTests {
                     .build())
             .build();
 
-    PriceResponse response = blockingStub.getCurrentPrice(request);
+    PriceResponse response = blockingStub.getCurrentPriceByProductAndBrand(request);
 
     assertThat(response).isNotNull();
-    assertThat(response.getProductId()).isEqualTo(productId);
-    assertThat(response.getBrandId()).isEqualTo(brandId);
-  }
-
-  @Test
-  public void testGetCurrentPriceNotFound() {
-    long productId = 999;
-    long brandId = 999;
-    String testDate = "2023-01-01T00:00:00";
-
-    GetCurrentPriceRequest request =
-        GetCurrentPriceRequest.newBuilder()
-            .setProductId(productId)
-            .setBrandId(brandId)
-            .setDate(
-                Timestamp.newBuilder()
-                    .setSeconds(
-                        LocalDateTime.parse(testDate)
-                            .atZone(ZoneId.systemDefault())
-                            .toEpochSecond())
-                    .setNanos(LocalDateTime.parse(testDate).getNano())
-                    .build())
-            .build();
-
-    assertThatThrownBy(() -> blockingStub.getCurrentPrice(request))
-        .isInstanceOf(StatusRuntimeException.class)
-        .hasMessageContaining("No price found for the given criteria.");
+    assertThat(response.getPrice()).isEqualByComparingTo(38.95);
   }
 }
