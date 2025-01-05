@@ -18,7 +18,7 @@ public class PriceController implements RestPricePort {
 
   @Override
   public Mono<Price> getCurrentPrice(Long productId, Long brandId, LocalDateTime date) {
-    return priceService.getCurrentPrice(productId, brandId, date);
+    return priceService.getCurrentPriceByProductAndBrand(productId, brandId, date);
   }
 
   @Override
