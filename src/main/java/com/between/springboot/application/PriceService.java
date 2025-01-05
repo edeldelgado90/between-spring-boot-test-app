@@ -1,7 +1,7 @@
 package com.between.springboot.application;
 
 import com.between.springboot.domain.price.Price;
-import com.between.springboot.domain.price.PriceCalculator;
+import com.between.springboot.domain.price.PriceManager;
 import com.between.springboot.domain.price.PriceNotFoundException;
 import com.between.springboot.port.out.DatabasePricePort;
 import java.time.LocalDateTime;
@@ -14,12 +14,22 @@ import reactor.core.publisher.Mono;
 @Service
 public class PriceService {
   private final DatabasePricePort priceRepository;
+  private final PriceManager priceManager;
 
   public PriceService(DatabasePricePort priceRepository) {
     this.priceRepository = priceRepository;
+    this.priceManager = PriceManager.builder().build();
   }
 
   public Mono<Price> create(Price price) {
+    Flux<Price> prices =
+        priceRepository.findAllByProductIdAndBrandId(price.getProductId(), price.getBrandId());
+    boolean priceIsOverlapping = this.priceManager.doesPriceOverlap(prices, price);
+
+    if (priceIsOverlapping) {
+      return Mono.error(new PriceNotFoundException("Price overlaps with an existing price."));
+    }
+
     return priceRepository.save(price);
   }
 
@@ -34,7 +44,8 @@ public class PriceService {
   public Mono<Price> getCurrentPriceByProductAndBrand(
       Long productId, Long brandId, LocalDateTime date) {
     Flux<Price> prices = priceRepository.getCurrentPriceByProductAndBrand(productId, brandId, date);
-    return PriceCalculator.calculateCurrentPrice(prices)
+    return this.priceManager
+        .findHighestPriorityPrice(prices)
         .switchIfEmpty(
             Mono.error(
                 new PriceNotFoundException("No price found for the given product and brand.")));
