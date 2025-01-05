@@ -1,4 +1,4 @@
-package com.between.springboot.config;
+package com.between.springboot.application.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.web.ReactivePageableHandlerMethodArgumentResolver;
