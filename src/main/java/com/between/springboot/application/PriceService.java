@@ -6,6 +6,7 @@ import com.between.springboot.domain.price.PriceNotFoundException;
 import com.between.springboot.domain.price.PriceOverlappingException;
 import com.between.springboot.port.out.DatabasePricePort;
 import java.time.LocalDateTime;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -52,6 +53,7 @@ public class PriceService {
     return priceRepository.findAllBy(pageable);
   }
 
+  @Cacheable(value = "currentPrices", key = "#productId + '-' + #brandId + '-' + #date")
   public Mono<Price> getCurrentPriceByProductAndBrand(
       Long productId, Long brandId, LocalDateTime date) {
     Flux<Price> prices = priceRepository.getCurrentPriceByProductAndBrand(productId, brandId, date);
