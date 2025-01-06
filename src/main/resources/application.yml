@@ -27,3 +27,9 @@ spring:
   messages:
     basename: messages
     encoding: UTF-8
+springdoc:
+  api-docs:
+    enabled: true
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
