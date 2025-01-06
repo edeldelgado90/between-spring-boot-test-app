@@ -1,0 +1,7 @@
+global:
+  scrape_interval: 5s
+
+scrape_configs:
+  - job_name: 'between-spring-boot-test-app'
+    static_configs:
+      - targets: ['between-spring-boot-test-app:8080']
