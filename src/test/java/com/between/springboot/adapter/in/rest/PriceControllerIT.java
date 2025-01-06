@@ -13,11 +13,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@DirtiesContext
 public class PriceControllerIT {
 
   @Autowired private WebTestClient webTestClient;
@@ -222,5 +224,18 @@ public class PriceControllerIT {
               assertThat(error.getError())
                   .isEqualTo(String.format("Price with ID %d not found.", priceId));
             });
+  }
+
+  @Test
+  @DisplayName("Delete existed price must return ok")
+  public void deleteExistedPriceMustReturnOk() {
+    Long priceId = 1L;
+    webTestClient
+        .delete()
+        .uri("/api/prices/{id}", priceId)
+        .accept(MediaType.APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isOk();
   }
 }

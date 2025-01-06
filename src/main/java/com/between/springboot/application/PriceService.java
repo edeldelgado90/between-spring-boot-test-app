@@ -42,10 +42,10 @@ public class PriceService {
   public Mono<Void> delete(Long id) {
     return priceRepository
         .findById(id)
-        .flatMap(existingPrice -> priceRepository.delete(existingPrice.getId()))
         .switchIfEmpty(
             Mono.error(
-                new PriceNotFoundException(String.format("Price with ID %d not found.", id))));
+                new PriceNotFoundException(String.format("Price with ID %d not found.", id))))
+        .flatMap(existingPrice -> priceRepository.delete(id));
   }
 
   public Mono<Page<Price>> findAllBy(Pageable pageable) {
