@@ -4,6 +4,10 @@ import com.between.springboot.application.PriceService;
 import com.between.springboot.domain.price.Price;
 import com.between.springboot.port.in.rest.RestPricePort;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import java.time.LocalDateTime;
@@ -24,7 +28,30 @@ public class PriceController implements RestPricePort {
   }
 
   @PostMapping
-  @Operation(summary = "Create a new price")
+  @Operation(
+      summary = "Create a new price",
+      requestBody =
+          @io.swagger.v3.oas.annotations.parameters.RequestBody(
+              description = "Price object to be created",
+              content =
+                  @Content(
+                      mediaType = "application/json",
+                      schema =
+                          @Schema(
+                              implementation = Price.class,
+                              example =
+                                  """
+                    {
+                        "brandId": 1,
+                        "startDate": "2023-01-01T00:00:00",
+                        "endDate": "2023-12-31T23:59:59",
+                        "priceList": 1,
+                        "productId": 35455,
+                        "priority": 1,
+                        "price": 100.00,
+                        "curr": "EUR"
+                    }
+            """))))
   @ApiResponses(
       value = {
         @ApiResponse(responseCode = "200", description = "Price created successfully"),
@@ -37,7 +64,15 @@ public class PriceController implements RestPricePort {
   }
 
   @DeleteMapping("/{id}")
-  @Operation(summary = "Delete a price by Id")
+  @Operation(
+      summary = "Delete a price by Id",
+      parameters = {
+        @Parameter(
+            name = "id",
+            required = true,
+            description = "ID of the price to delete",
+            in = ParameterIn.PATH)
+      })
   @ApiResponses(
       value = {
         @ApiResponse(responseCode = "204", description = "Price deleted successfully"),
@@ -49,7 +84,25 @@ public class PriceController implements RestPricePort {
   }
 
   @GetMapping("/current")
-  @Operation(summary = "Get current price for a product and brand")
+  @Operation(
+      summary = "Get current price for a product and brand",
+      parameters = {
+        @Parameter(
+            name = "product_id",
+            required = true,
+            description = "ID of the product",
+            in = ParameterIn.QUERY),
+        @Parameter(
+            name = "brand_id",
+            required = true,
+            description = "ID of the brand",
+            in = ParameterIn.QUERY),
+        @Parameter(
+            name = "date",
+            required = true,
+            description = "Date to check current price",
+            in = ParameterIn.QUERY)
+      })
   @ApiResponses(
       value = {
         @ApiResponse(responseCode = "200", description = "Current price found"),
@@ -65,7 +118,26 @@ public class PriceController implements RestPricePort {
   }
 
   @GetMapping("/")
-  @Operation(summary = "Retrieve all prices")
+  @Operation(
+      summary = "Retrieve all prices",
+      parameters = {
+        @Parameter(
+            name = "page",
+            description = "Page number to retrieve, starting from 0",
+            in = ParameterIn.QUERY,
+            example = "0"),
+        @Parameter(
+            name = "size",
+            description = "Number of items to retrieve per page",
+            in = ParameterIn.QUERY,
+            example = "10"),
+        @Parameter(
+            name = "sort",
+            description =
+                "Sorting criteria in the format: property,(asc|desc). Default sorting order is ascending. Multiple sort criteria are supported.",
+            in = ParameterIn.QUERY,
+            example = "startDate,desc")
+      })
   @ApiResponses(
       value = {@ApiResponse(responseCode = "200", description = "Prices retrieved successfully")})
   @Override
