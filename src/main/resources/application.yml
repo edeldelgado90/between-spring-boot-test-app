@@ -33,3 +33,16 @@ springdoc:
     path: /api-docs
   swagger-ui:
     path: /swagger-ui.html
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+logging:
+  level:
+    root: INFO
+    com.between.springboot: INFO
