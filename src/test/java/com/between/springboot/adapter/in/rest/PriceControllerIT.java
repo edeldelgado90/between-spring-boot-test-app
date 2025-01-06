@@ -2,13 +2,16 @@ package com.between.springboot.adapter.in.rest;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
+import com.between.springboot.domain.ErrorResponse;
 import com.between.springboot.domain.price.Price;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -22,8 +25,8 @@ public class PriceControllerIT {
   private final Long brandId = 1L;
 
   @Test
-  @DisplayName("Test 1: petición a las 10:00 del día 14 del producto 35455 para la brand 1 (ZARA)")
-  public void getCurrentPriceAt_2020_06_14_10_00_ForProduct_35455_And_Zara_Success() {
+  @DisplayName("Test 1: Request at 10:00 on the 14th for product 35455 for brand 1 (ZARA)")
+  public void getCurrentPriceAt202006141000ForProduct35455AndZaraSuccess() {
     webTestClient
         .get()
         .uri(
@@ -44,8 +47,8 @@ public class PriceControllerIT {
   }
 
   @Test
-  @DisplayName("Test 2: petición a las 16:00 del día 14 del producto 35455 para la brand 1 (ZARA)")
-  public void getCurrentPriceAt_2020_06_14_16_00_ForProduct_35455_And_Zara_Success() {
+  @DisplayName("Test 2: Request at 16:00 on the 14th for product 35455 for brand 1 (ZARA)")
+  public void getCurrentPriceAt202006141600ForProduct35455AndZaraSuccess() {
     webTestClient
         .get()
         .uri(
@@ -66,8 +69,8 @@ public class PriceControllerIT {
   }
 
   @Test
-  @DisplayName("Test 3: petición a las 21:00 del día 14 del producto 35455 para la brand 1 (ZARA)")
-  public void getCurrentPriceAt_2020_06_14_21_00_ForProduct_35455_And_Zara_Success() {
+  @DisplayName("Test 3: Request at 21:00 on the 14th for product 35455 for brand 1 (ZARA)")
+  public void getCurrentPriceAt_202006142100ForProduct35455AndZaraSuccess() {
     webTestClient
         .get()
         .uri(
@@ -88,8 +91,8 @@ public class PriceControllerIT {
   }
 
   @Test
-  @DisplayName("Test 4: petición a las 10:00 del día 15 del producto 35455 para la brand 1 (ZARA)")
-  public void getCurrentPriceAt_2020_06_15_10_00_ForProduct_35455_And_Zara_Success() {
+  @DisplayName("Test 4: Request at 10:00 on the 15th for product 35455 for brand 1 (ZARA)")
+  public void getCurrentPriceAt202006151000ForProduct35455AndZaraSuccess() {
     webTestClient
         .get()
         .uri(
@@ -110,8 +113,8 @@ public class PriceControllerIT {
   }
 
   @Test
-  @DisplayName("Test 5: petición a las 21:00 del día 16 del producto 35455 para la brand 1 (ZARA)")
-  public void getCurrentPriceAt_2020_06_16_21_00_ForProduct_35455_And_Zara_Success() {
+  @DisplayName("Test 5: Request at 21:00 on the 16th for product 35455 for brand 1 (ZARA)")
+  public void getCurrentPriceAt202006162100ForProduct35455AndZaraSuccess() {
     webTestClient
         .get()
         .uri(
@@ -129,5 +132,95 @@ public class PriceControllerIT {
         .expectBody(Price.class)
         .value(
             price -> assertThat(price.getPrice()).isEqualByComparingTo(BigDecimal.valueOf(38.95)));
+  }
+
+  @Test
+  @DisplayName("Create price overlapping must return error")
+  public void createPriceOverlappingMustReturnError() {
+    Price price =
+        Price.builder()
+            .brandId(1L)
+            .startDate(LocalDateTime.of(2020, 6, 15, 0, 0))
+            .endDate(LocalDateTime.of(2020, 7, 15, 23, 59))
+            .priceList(1L)
+            .productId(35455L)
+            .priority(2)
+            .price(BigDecimal.valueOf(150.50))
+            .curr("EUR")
+            .build();
+
+    webTestClient
+        .post()
+        .uri("/api/prices")
+        .accept(MediaType.APPLICATION_JSON)
+        .bodyValue(price)
+        .exchange()
+        .expectStatus()
+        .isEqualTo(HttpStatus.CONFLICT)
+        .expectBody(ErrorResponse.class)
+        .value(
+            error -> {
+              assertThat(error.getStatus()).isEqualTo(HttpStatus.CONFLICT.value());
+              assertThat(error.getError()).isEqualTo("Price overlaps with an existing price.");
+            });
+  }
+
+  @Test
+  @DisplayName("Create price successfully must return created price")
+  public void createPriceSuccessfullyMustReturnCreatedPrice() {
+    LocalDateTime startDate = LocalDateTime.of(2021, 1, 1, 0, 0);
+    LocalDateTime endDate = LocalDateTime.of(2021, 12, 31, 23, 59);
+    Price price =
+        Price.builder()
+            .brandId(1L)
+            .startDate(startDate)
+            .endDate(endDate)
+            .priceList(1L)
+            .productId(35455L)
+            .priority(2)
+            .price(BigDecimal.valueOf(200))
+            .curr("EUR")
+            .build();
+
+    webTestClient
+        .post()
+        .uri("/api/prices")
+        .accept(MediaType.APPLICATION_JSON)
+        .bodyValue(price)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody(Price.class)
+        .value(
+            createdPrice -> {
+              assertThat(createdPrice.getBrandId()).isEqualTo(1L);
+              assertThat(createdPrice.getStartDate()).isEqualTo(startDate);
+              assertThat(createdPrice.getEndDate()).isEqualTo(endDate);
+              assertThat(createdPrice.getPriceList()).isEqualTo(1L);
+              assertThat(createdPrice.getProductId()).isEqualTo(35455L);
+              assertThat(createdPrice.getPriority()).isEqualTo(2);
+              assertThat(createdPrice.getPrice()).isEqualByComparingTo(BigDecimal.valueOf(200));
+              assertThat(createdPrice.getCurr()).isEqualTo("EUR");
+            });
+  }
+
+  @Test
+  @DisplayName("Delete non existed price must return error")
+  public void deleteNonExistedPriceMustReturnError() {
+    Long priceId = 100L;
+    webTestClient
+        .delete()
+        .uri("/api/prices/{id}", priceId)
+        .accept(MediaType.APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isNotFound()
+        .expectBody(ErrorResponse.class)
+        .value(
+            error -> {
+              assertThat(error.getStatus()).isEqualTo(HttpStatus.NOT_FOUND.value());
+              assertThat(error.getError())
+                  .isEqualTo(String.format("Price with ID %d not found.", priceId));
+            });
   }
 }
