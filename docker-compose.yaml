@@ -1,6 +1,10 @@
 version: '3.8'
 
-volumes:
-  db:
-    driver:
-      local
+services:
+  springboot-app:
+    build: .
+    ports:
+      - "8080:8080" # Map the HTTP port
+      - "9090:9090" # Map the gRPC port
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
