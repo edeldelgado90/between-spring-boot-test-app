@@ -11,5 +11,7 @@ public interface DatabasePort<T> {
 
   Mono<Void> delete(Long id);
 
+  Mono<Price> findById(Long id);
+
   Mono<Page<Price>> findAllBy(Pageable pageable);
 }

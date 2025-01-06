@@ -21,8 +21,16 @@ public class PriceManager {
                     .orElse(Mono.empty()));
   }
 
-  public boolean doesPriceOverlap(Flux<Price> existingPrices, Price newPrice) {
-    return Boolean.TRUE.equals(existingPrices.any(existingPrice -> isOverlapping(existingPrice, newPrice)).block());
+  public Mono<Boolean> doesPriceOverlap(Flux<Price> existingPrices, Price newPrice) {
+    return existingPrices
+            .collectList()
+            .flatMap(priceList -> {
+              if (priceList.isEmpty()) {
+                return Mono.just(false);
+              }
+              boolean overlaps = priceList.stream().anyMatch(existingPrice -> isOverlapping(existingPrice, newPrice));
+              return Mono.just(overlaps);
+            });
   }
 
   private static boolean isOverlapping(Price existingPrice, Price newPrice) {

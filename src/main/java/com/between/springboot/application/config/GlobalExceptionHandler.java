@@ -15,12 +15,13 @@ public class GlobalExceptionHandler {
 
   @ExceptionHandler(PriceNotFoundException.class)
   public ResponseEntity<ErrorResponse> handlePriceNotFoundException(PriceNotFoundException ex) {
-    return getResponseEntity(HttpStatus.NOT_FOUND, "Price not found");
+    return getResponseEntity(HttpStatus.NOT_FOUND, ex.getMessage());
   }
 
   @ExceptionHandler(PriceOverlappingException.class)
-  public ResponseEntity<ErrorResponse> handlePriceNotFoundException(PriceOverlappingException ex) {
-    return getResponseEntity(HttpStatus.CONFLICT, "Price is overlapping");
+  public ResponseEntity<ErrorResponse> handlePriceOverlappingException(
+      PriceOverlappingException ex) {
+    return getResponseEntity(HttpStatus.CONFLICT, ex.getMessage());
   }
 
   private static ResponseEntity<ErrorResponse> getResponseEntity(
@@ -28,6 +29,6 @@ public class GlobalExceptionHandler {
     ErrorResponse errorResponse =
         new ErrorResponse(
             LocalDateTime.now(), status.value(), message, UUID.randomUUID().toString());
-    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    return ResponseEntity.status(status).body(errorResponse);
   }
 }

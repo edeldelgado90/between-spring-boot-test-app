@@ -37,6 +37,11 @@ public class DatabasePriceAdapter implements DatabasePricePort {
   }
 
   @Override
+  public Mono<Price> findById(Long id) {
+    return repository.findById(id).map(mapper::toModel);
+  }
+
+  @Override
   public Mono<Page<Price>> findAllBy(Pageable pageable) {
     return this.repository
         .findAllBy(pageable)
