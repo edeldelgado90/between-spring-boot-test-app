@@ -24,6 +24,29 @@ spring:
     locations: classpath:db/migration
     baseline-on-migrate: true
     baseline-version: 1
+  cache:
+    type: caffeine
+    caffeine:
+      spec: maximumSize=100, expireAfterWrite=10m
   messages:
     basename: messages
     encoding: UTF-8
+springdoc:
+  api-docs:
+    enabled: true
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+logging:
+  level:
+    root: INFO
+    com.between.springboot: INFO

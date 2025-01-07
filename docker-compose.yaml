@@ -1,10 +1,29 @@
 version: '3.8'
 
 services:
-  springboot-app:
+  between-spring-boot-test-app:
     build: .
     ports:
       - "8080:8080" # Map the HTTP port
       - "9090:9090" # Map the gRPC port
     environment:
       SPRING_PROFILES_ACTIVE: docker
+    depends_on:
+      - prometheus
+      - grafana
+
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9091:9090"
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
