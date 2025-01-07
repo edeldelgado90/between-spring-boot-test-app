@@ -1,6 +1,7 @@
 package com.between.springboot.adapter.in.rest;
 
 import com.between.springboot.application.PriceService;
+import com.between.springboot.domain.ErrorResponse;
 import com.between.springboot.domain.price.Price;
 import com.between.springboot.port.in.rest.RestPricePort;
 import io.swagger.v3.oas.annotations.Operation;
@@ -10,6 +11,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.time.LocalDateTime;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,6 +21,7 @@ import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping("/api/prices")
+@Tag(name = "prices", description = "Operations related to prices")
 public class PriceController implements RestPricePort {
 
   private final PriceService priceService;
@@ -30,6 +33,8 @@ public class PriceController implements RestPricePort {
   @PostMapping
   @Operation(
       summary = "Create a new price",
+      description =
+          "Create a new price for a product and brand. If the price overlaps with another price, it will return a 409 status code.",
       requestBody =
           @io.swagger.v3.oas.annotations.parameters.RequestBody(
               description = "Price object to be created",
@@ -54,9 +59,30 @@ public class PriceController implements RestPricePort {
             """))))
   @ApiResponses(
       value = {
-        @ApiResponse(responseCode = "200", description = "Price created successfully"),
-        @ApiResponse(responseCode = "409", description = "Price is overlapping with another price"),
-        @ApiResponse(responseCode = "400", description = "Invalid input")
+        @ApiResponse(
+            responseCode = "200",
+            description = "Price created successfully",
+            content = {
+              @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(implementation = Price.class))
+            }),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Invalid input",
+            content = {
+              @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(implementation = ErrorResponse.class))
+            }),
+        @ApiResponse(
+            responseCode = "409",
+            description = "Price is overlapping with another price",
+            content = {
+              @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(implementation = ErrorResponse.class))
+            })
       })
   @Override
   public Mono<Price> create(@RequestBody Price price) {
@@ -66,6 +92,8 @@ public class PriceController implements RestPricePort {
   @DeleteMapping("/{id}")
   @Operation(
       summary = "Delete a price by Id",
+      description =
+          "Delete a price by its ID. If the price does not exist, it will return a 404 status code.",
       parameters = {
         @Parameter(
             name = "id",
@@ -75,8 +103,15 @@ public class PriceController implements RestPricePort {
       })
   @ApiResponses(
       value = {
-        @ApiResponse(responseCode = "204", description = "Price deleted successfully"),
-        @ApiResponse(responseCode = "404", description = "Price not found")
+        @ApiResponse(responseCode = "200", description = "Price deleted successfully"),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Price not found",
+            content = {
+              @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(implementation = ErrorResponse.class))
+            })
       })
   @Override
   public Mono<Void> delete(@PathVariable Long id) {
@@ -86,6 +121,8 @@ public class PriceController implements RestPricePort {
   @GetMapping("/current")
   @Operation(
       summary = "Get current price for a product and brand",
+      description =
+          "Get the current price for a product and brand at a given date. If the price does not exist, it will return a 404 status code.",
       parameters = {
         @Parameter(
             name = "product_id",
@@ -105,8 +142,22 @@ public class PriceController implements RestPricePort {
       })
   @ApiResponses(
       value = {
-        @ApiResponse(responseCode = "200", description = "Current price found"),
-        @ApiResponse(responseCode = "404", description = "Price not found for the given criteria")
+        @ApiResponse(
+            responseCode = "200",
+            description = "Current price found",
+            content = {
+              @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(implementation = Price.class))
+            }),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Price not found for the given criteria",
+            content = {
+              @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(implementation = ErrorResponse.class))
+            })
       })
   @ResponseBody
   @Override
@@ -120,6 +171,8 @@ public class PriceController implements RestPricePort {
   @GetMapping("/")
   @Operation(
       summary = "Retrieve all prices",
+      description =
+          "Retrieve all prices paginated and sorted. If no parameters are provided, it will return the first 10 prices sorted by startDate in ascending order.",
       parameters = {
         @Parameter(
             name = "page",

@@ -21,7 +21,20 @@ The application is connected to an in-memory H2 database with migrations managed
 - Maven
 - Docker (optional, if you want containers)
 
-## Installation
+## Running the Application (Docker)
+
+1. **Clone the Repository**:
+   ```bash
+   git clone https://github.com/edeldelgado90/between-spring-boot-test-app.git
+   cd between-spring-boot-test-app
+   ```
+
+2. **Build and Run the application**:
+    ```bash
+    docker-compose up --build
+    ```
+
+## Running the Application (Manual)
 
 1. **Clone the Repository**:
    ```bash
@@ -36,84 +49,47 @@ The application is connected to an in-memory H2 database with migrations managed
     ```bash
     mvn spring-boot:run
     ```
-4. **Access the H2 Console**:
-   You can access the H2 console at:
-    ```
-    http://localhost:8080/h2-console
-    ```
-   Use the following connection URL:
-    ```
-    jdbc:h2:mem:testdb
-    ```
+
+## Accessing the OpenAPI Documentation
+
+Once the application is running, you can access the OpenAPI documentation through the following URL:
+
+[http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
 
 ## Database Information
 
-The following tables are created during the migration process:
+The application inserts the following default data into the tables upon startup during the migration process:
 
-```sql
-CREATE TABLE brands
-(
-    id   BIGINT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL
-);
+### Brands
 
-CREATE TABLE products
-(
-    id          BIGINT PRIMARY KEY,
-    name        VARCHAR(255) NOT NULL,
-    description TEXT,
-    photo       VARCHAR(255)
-);
+| id | name |
+|----|------|
+| 1  | ZARA |
 
-CREATE TABLE price_list
-(
-    id          BIGINT PRIMARY KEY,
-    description VARCHAR(255)
-);
+### Products
 
-CREATE TABLE prices
-(
-    id         BIGINT AUTO_INCREMENT PRIMARY KEY,
-    brand_id   BIGINT         NOT NULL,
-    start_date TIMESTAMP      NOT NULL,
-    end_date   TIMESTAMP      NOT NULL,
-    price_list BIGINT         NOT NULL,
-    product_id BIGINT         NOT NULL,
-    priority   INT            NOT NULL,
-    price      DECIMAL(10, 2) NOT NULL,
-    curr       VARCHAR(3)     NOT NULL,
-    FOREIGN KEY (brand_id) REFERENCES brands (id),
-    FOREIGN KEY (product_id) REFERENCES products (id),
-    FOREIGN KEY (price_list) REFERENCES price_list (id),
-    CONSTRAINT unq_price UNIQUE (brand_id, product_id, curr, price_list, priority)
-);
+| id    | name         | description                                                                                                    |
+|-------|--------------|----------------------------------------------------------------------------------------------------------------|
+|
+| 35455 | JEANS MARINE | Jeans marine fit con cinturilla interior ajustable y cierre botón frontal. Bolsillos tipo plastrón en espalda. |
 
-CREATE INDEX idx_price_brand_product ON prices (brand_id, product_id);
-CREATE INDEX idx_price_start_end ON prices (start_date, end_date);
-````
+### Price List
 
-The application inserts the following default data into the tables upon startup:
+| id | description                     |
+|----|---------------------------------|
+| 1  | Listado de Precios del 2020 - 1 |
+| 2  | Listado de Precios del 2020 - 2 |
+| 3  | Listado de Precios del 2020 - 3 |
+| 4  | Listado de Precios del 2020 - 4 |
 
-```sql
-INSERT INTO brands (id, name)
-VALUES (1, 'ZARA');
+### Prices
 
-INSERT INTO products (id, name, description)
-VALUES (35455, 'JEANS MARINE',
-        'Jeans marine fit con cinturilla interior ajustable y cierre botón frontal. Bolsillos tipo plastrón en espalda.');
-
-INSERT INTO price_list (id, description)
-VALUES (1, 'Listado de Precios del 2020 - 1'),
-       (2, 'Listado de Precios del 2020 - 2'),
-       (3, 'Listado de Precios del 2020 - 3'),
-       (4, 'Listado de Precios del 2020 - 4');
-
-INSERT INTO prices (brand_id, start_date, end_date, price_list, product_id, priority, price, curr)
-VALUES (1, '2020-06-14 00:00:00', '2020-12-31 23:59:59', 1, 35455, 0, 35.50, 'EUR'),
-       (1, '2020-06-14 15:00:00', '2020-06-14 18:30:00', 2, 35455, 1, 25.45, 'EUR'),
-       (1, '2020-06-15 00:00:00', '2020-06-15 11:00:00', 3, 35455, 1, 30.50, 'EUR'),
-       (1, '2020-06-15 16:00:00', '2020-12-31 23:59:59', 4, 35455, 1, 38.95, 'EUR');
-```
+| brand_id | start_date          | end_date            | price_list | product_id | priority | price | curr |
+|----------|---------------------|---------------------|------------|------------|----------|-------|------|
+| 1        | 2020-06-14 00:00:00 | 2020-12-31 23:59:59 | 1          | 35455      | 0        | 35.50 | EUR  |
+| 1        | 2020-06-14 15:00:00 | 2020-06-14 18:30:00 | 2          | 35455      | 1        | 25.45 | EUR  |
+| 1        | 2020-06-15 00:00:00 | 2020-06-15 11:00:00 | 3          | 35455      | 1        | 30.50 | EUR  |
+| 1        | 2020-06-15 16:00:00 | 2020-12-31 23:59:59 | 4          | 35455      | 1        | 38.95 | EUR  |
 
 ## Database Schema Diagram
 
@@ -158,6 +134,28 @@ erDiagram
 
 ## REST API Endpoints
 
+### Get Current Price
+
+#### GET `/api/prices/current?product_id={id}&brand_id={id}&date={date}`
+
+Curl Example:
+
+```bash
+curl -X GET http://localhost:8080/api/prices/current?product_id=35455&brand_id=1&date=2020-07-01T12:00:00 \
+  -H "Content-Type: application/json"
+```
+
+### Get All Prices
+
+#### GET `/api/prices/current?product_id={id}&brand_id={id}&date={date}`
+
+Curl Example:
+
+```bash
+curl -X GET http://localhost:8080/api/prices/?page=0&size=10 \
+ -H 'Accept-Encoding: application/json'
+```
+
 ### Create a Price
 
 #### POST `/api/prices`
@@ -194,17 +192,6 @@ curl -X POST http://localhost:8080/api/prices \
       }'
 ```
 
-### Get Current Price
-
-#### GET `/api/prices/current?product_id={id}&brand_id={id}&date={date}`
-
-Curl Example:
-
-```bash
-curl -X GET http://localhost:8080/api/prices/current?product_id=35455&brand_id=1&date=2020-07-01T12:00:00 \
-  -H "Content-Type: application/json"
-```
-
 ### Delete a Price
 
 #### DELETE `/api/prices/{id}`
@@ -216,12 +203,6 @@ curl -X DELETE http://localhost:8080/api/prices/1 \
   -H "Content-Type: application/json"
 ```
 
-## Accessing the OpenAPI Documentation
-
-Once the application is running, you can access the OpenAPI documentation through the following URL:
-
-[http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
-
 ## gRPC Usage
 
 To use gRPC, ensure you have grpcurl installed and use the following command to invoke the service:
@@ -231,7 +212,7 @@ grpcurl -plaintext -d '{
     "productId": 35455,
     "brandId": 1,
     "date": "2020-06-14T20:32:05Z"
-}' localhost:9090 prices.PriceService/GetCurrentPriceByProductAndBrand
+}' localhost:9090 prices.PriceService/getCurrentPriceByProductAndBrand
 ```
 
 ## Running Tests

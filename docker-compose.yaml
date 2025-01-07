@@ -4,8 +4,8 @@ services:
   between-spring-boot-test-app:
     build: .
     ports:
-      - "8080:8080"
-      - "9090:9090"
+      - "8080:8080" # Map the HTTP port
+      - "9090:9090" # Map the gRPC port
     environment:
       SPRING_PROFILES_ACTIVE: docker
     depends_on:
