@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface StartDateBeforeEndDate {
-  String message() default "price.startDate.beforeEndDate";
+  String message() default "{price.startDate.beforeEndDate}";
 
   Class<?>[] groups() default {};
 

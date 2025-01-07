@@ -9,6 +9,9 @@ public class StartDateBeforeEndDateValidator
 
   @Override
   public boolean isValid(PriceDTO price, ConstraintValidatorContext context) {
+    if (price.getStartDate() == null || price.getEndDate() == null) {
+      return true;
+    }
     return price.getStartDate().isBefore(price.getEndDate());
   }
 }
