@@ -1,6 +1,8 @@
 package com.between.springboot.adapter.in.rest;
 
 import com.between.springboot.application.PriceService;
+import com.between.springboot.application.mapper.PriceMapper;
+import com.between.springboot.application.mapper.dto.PriceDTO;
 import com.between.springboot.domain.ErrorResponse;
 import com.between.springboot.domain.price.Price;
 import com.between.springboot.port.in.rest.RestPricePort;
@@ -12,8 +14,12 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
@@ -25,9 +31,11 @@ import reactor.core.publisher.Mono;
 public class PriceController implements RestPricePort {
 
   private final PriceService priceService;
+  private final PriceMapper priceMapper;
 
-  public PriceController(PriceService priceService) {
+  public PriceController(PriceService priceService, PriceMapper priceMapper) {
     this.priceService = priceService;
+    this.priceMapper = priceMapper;
   }
 
   @PostMapping
@@ -43,7 +51,7 @@ public class PriceController implements RestPricePort {
                       mediaType = "application/json",
                       schema =
                           @Schema(
-                              implementation = Price.class,
+                              implementation = PriceDTO.class,
                               example =
                                   """
                     {
@@ -65,7 +73,7 @@ public class PriceController implements RestPricePort {
             content = {
               @Content(
                   mediaType = "application/json",
-                  schema = @Schema(implementation = Price.class))
+                  schema = @Schema(implementation = PriceDTO.class))
             }),
         @ApiResponse(
             responseCode = "400",
@@ -85,8 +93,10 @@ public class PriceController implements RestPricePort {
             })
       })
   @Override
-  public Mono<Price> create(@RequestBody Price price) {
-    return priceService.create(price);
+  public Mono<PriceDTO> create(@Valid @RequestBody PriceDTO price) {
+    return priceService
+        .create(priceMapper.fromPriceDTOToPrice(price))
+        .map(priceMapper::fromPriceToPriceDTO);
   }
 
   @DeleteMapping("/{id}")
@@ -148,7 +158,7 @@ public class PriceController implements RestPricePort {
             content = {
               @Content(
                   mediaType = "application/json",
-                  schema = @Schema(implementation = Price.class))
+                  schema = @Schema(implementation = PriceDTO.class))
             }),
         @ApiResponse(
             responseCode = "404",
@@ -161,11 +171,13 @@ public class PriceController implements RestPricePort {
       })
   @ResponseBody
   @Override
-  public Mono<Price> getCurrentPrice(
+  public Mono<PriceDTO> getCurrentPrice(
       @RequestParam(name = "product_id") Long productId,
       @RequestParam(name = "brand_id") Long brandId,
       @RequestParam LocalDateTime date) {
-    return priceService.getCurrentPriceByProductAndBrand(productId, brandId, date);
+    Mono<Price> currentPriceByProductAndBrand =
+        priceService.getCurrentPriceByProductAndBrand(productId, brandId, date);
+    return currentPriceByProductAndBrand.map(priceMapper::fromPriceToPriceDTO);
   }
 
   @GetMapping("/")
@@ -194,7 +206,16 @@ public class PriceController implements RestPricePort {
   @ApiResponses(
       value = {@ApiResponse(responseCode = "200", description = "Prices retrieved successfully")})
   @Override
-  public Mono<Page<Price>> findAll(@PageableDefault() Pageable pageable) {
-    return priceService.findAllBy(pageable);
+  public Mono<Page<PriceDTO>> findAll(@PageableDefault() Pageable pageable) {
+    Mono<Page<Price>> pricesMono = priceService.findAllBy(pageable);
+    return pricesMono.map(
+        prices -> {
+          List<PriceDTO> priceDTOs =
+              prices.getContent().stream()
+                  .map(priceMapper::fromPriceToPriceDTO)
+                  .collect(Collectors.toList());
+
+          return new PageImpl<>(priceDTOs, pageable, prices.getTotalElements());
+        });
   }
 }

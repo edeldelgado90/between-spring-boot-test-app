@@ -26,9 +26,9 @@ public class DatabasePriceAdapter implements DatabasePricePort {
 
   @Override
   public Mono<Price> save(Price price) {
-    PriceEntity priceEntity = mapper.toEntity(price);
+    PriceEntity priceEntity = mapper.fromPriceToPriceEntity(price);
     Mono<PriceEntity> response = repository.save(priceEntity);
-    return response.map(mapper::toModel);
+    return response.map(mapper::fromPriceEntityToPrice);
   }
 
   @Override
@@ -38,14 +38,14 @@ public class DatabasePriceAdapter implements DatabasePricePort {
 
   @Override
   public Mono<Price> findById(Long id) {
-    return repository.findById(id).map(mapper::toModel);
+    return repository.findById(id).map(mapper::fromPriceEntityToPrice);
   }
 
   @Override
   public Mono<Page<Price>> findAllBy(Pageable pageable) {
     return this.repository
         .findAllBy(pageable)
-        .map(mapper::toModel)
+        .map(mapper::fromPriceEntityToPrice)
         .collectList()
         .flatMap(
             prices ->
@@ -60,11 +60,11 @@ public class DatabasePriceAdapter implements DatabasePricePort {
       Long productId, Long brandId, LocalDateTime date) {
     return repository
         .findByProductIdAndBrandIdAndDate(productId, brandId, date)
-        .map(mapper::toModel);
+        .map(mapper::fromPriceEntityToPrice);
   }
 
   @Override
   public Flux<Price> findAllByProductIdAndBrandId(Long productId, Long brandId) {
-    return repository.findAllByProductIdAndBrandId(productId, brandId).map(mapper::toModel);
+    return repository.findAllByProductIdAndBrandId(productId, brandId).map(mapper::fromPriceEntityToPrice);
   }
 }
