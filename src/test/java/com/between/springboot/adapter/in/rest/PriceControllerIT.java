@@ -2,8 +2,8 @@ package com.between.springboot.adapter.in.rest;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
+import com.between.springboot.application.mapper.dto.PriceDTO;
 import com.between.springboot.domain.ErrorResponse;
-import com.between.springboot.domain.price.Price;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import org.junit.jupiter.api.DisplayName;
@@ -43,7 +43,7 @@ public class PriceControllerIT {
         .exchange()
         .expectStatus()
         .isOk()
-        .expectBody(Price.class)
+        .expectBody(PriceDTO.class)
         .value(
             price -> assertThat(price.getPrice()).isEqualByComparingTo(BigDecimal.valueOf(35.50)));
   }
@@ -65,7 +65,7 @@ public class PriceControllerIT {
         .exchange()
         .expectStatus()
         .isOk()
-        .expectBody(Price.class)
+        .expectBody(PriceDTO.class)
         .value(
             price -> assertThat(price.getPrice()).isEqualByComparingTo(BigDecimal.valueOf(25.45)));
   }
@@ -87,7 +87,7 @@ public class PriceControllerIT {
         .exchange()
         .expectStatus()
         .isOk()
-        .expectBody(Price.class)
+        .expectBody(PriceDTO.class)
         .value(
             price -> assertThat(price.getPrice()).isEqualByComparingTo(BigDecimal.valueOf(35.50)));
   }
@@ -109,7 +109,7 @@ public class PriceControllerIT {
         .exchange()
         .expectStatus()
         .isOk()
-        .expectBody(Price.class)
+        .expectBody(PriceDTO.class)
         .value(
             price -> assertThat(price.getPrice()).isEqualByComparingTo(BigDecimal.valueOf(30.50)));
   }
@@ -131,7 +131,7 @@ public class PriceControllerIT {
         .exchange()
         .expectStatus()
         .isOk()
-        .expectBody(Price.class)
+        .expectBody(PriceDTO.class)
         .value(
             price -> assertThat(price.getPrice()).isEqualByComparingTo(BigDecimal.valueOf(38.95)));
   }
@@ -139,8 +139,8 @@ public class PriceControllerIT {
   @Test
   @DisplayName("Create price overlapping must return error")
   public void createPriceOverlappingMustReturnError() {
-    Price price =
-        Price.builder()
+    PriceDTO price =
+        PriceDTO.builder()
             .brandId(1L)
             .startDate(LocalDateTime.of(2020, 6, 15, 0, 0))
             .endDate(LocalDateTime.of(2020, 7, 15, 23, 59))
@@ -172,8 +172,8 @@ public class PriceControllerIT {
   public void createPriceSuccessfullyMustReturnCreatedPrice() {
     LocalDateTime startDate = LocalDateTime.of(2021, 1, 1, 0, 0);
     LocalDateTime endDate = LocalDateTime.of(2021, 12, 31, 23, 59);
-    Price price =
-        Price.builder()
+    PriceDTO price =
+        PriceDTO.builder()
             .brandId(1L)
             .startDate(startDate)
             .endDate(endDate)
@@ -192,7 +192,7 @@ public class PriceControllerIT {
         .exchange()
         .expectStatus()
         .isOk()
-        .expectBody(Price.class)
+        .expectBody(PriceDTO.class)
         .value(
             createdPrice -> {
               assertThat(createdPrice.getBrandId()).isEqualTo(1L);
@@ -205,6 +205,29 @@ public class PriceControllerIT {
               assertThat(createdPrice.getCurr()).isEqualTo("EUR");
             });
   }
+
+    @Test
+    @DisplayName("Create price with invalid data must return bad request")
+    public void createPriceWithEmptyBrandIdMustReturnError() {
+        PriceDTO priceDTO = PriceDTO.builder()
+                .brandId(null)
+                .startDate(LocalDateTime.of(2023, 1, 1, 0, 0))
+                .endDate(LocalDateTime.of(2023, 12, 31, 23, 59))
+                .priceList(1L)
+                .productId(35455L)
+                .priority(1)
+                .price(BigDecimal.valueOf(100.00))
+                .curr("EUR")
+                .build();
+
+        webTestClient.post()
+                .uri("/api/prices")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(priceDTO)
+                .exchange()
+                .expectStatus()
+                .isBadRequest();
+    }
 
   @Test
   @DisplayName("Delete non existed price must return error")

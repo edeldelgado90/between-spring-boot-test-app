@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -22,6 +23,12 @@ public class GlobalExceptionHandler {
   public ResponseEntity<ErrorResponse> handlePriceOverlappingException(
       PriceOverlappingException ex) {
     return getResponseEntity(HttpStatus.CONFLICT, ex.getMessage());
+  }
+
+  @ExceptionHandler(MethodArgumentNotValidException.class)
+  public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(
+      MethodArgumentNotValidException ex) {
+    return getResponseEntity(HttpStatus.BAD_REQUEST, ex.getMessage());
   }
 
   private static ResponseEntity<ErrorResponse> getResponseEntity(

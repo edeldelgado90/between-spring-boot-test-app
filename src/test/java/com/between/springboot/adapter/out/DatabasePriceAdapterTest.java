@@ -60,9 +60,9 @@ public class DatabasePriceAdapterTest {
             .curr("EUR")
             .build();
 
-    when(mapper.toEntity(price)).thenReturn(priceEntity);
+    when(mapper.fromPriceToPriceEntity(price)).thenReturn(priceEntity);
     when(repository.save(priceEntity)).thenReturn(Mono.just(priceEntity));
-    when(mapper.toModel(priceEntity)).thenReturn(price);
+    when(mapper.fromPriceEntityToPrice(priceEntity)).thenReturn(price);
 
     Mono<Price> result = databasePriceAdapter.save(price);
 
@@ -97,7 +97,7 @@ public class DatabasePriceAdapterTest {
             .build();
 
     when(repository.findById(priceId)).thenReturn(Mono.just(priceEntity));
-    when(mapper.toModel(priceEntity)).thenReturn(Price.builder().build());
+    when(mapper.fromPriceEntityToPrice(priceEntity)).thenReturn(Price.builder().build());
 
     Mono<Price> result = databasePriceAdapter.findById(priceId);
 
@@ -122,7 +122,7 @@ public class DatabasePriceAdapterTest {
             .build();
 
     when(repository.findAllBy(pageable)).thenReturn(Flux.just(priceEntity));
-    when(mapper.toModel(priceEntity)).thenReturn(Price.builder().id(priceEntity.getId()).build());
+    when(mapper.fromPriceEntityToPrice(priceEntity)).thenReturn(Price.builder().id(priceEntity.getId()).build());
     when(repository.count()).thenReturn(Mono.just(1L));
 
     Mono<Page<Price>> result = databasePriceAdapter.findAllBy(pageable);
@@ -153,7 +153,7 @@ public class DatabasePriceAdapterTest {
     when(repository.findByProductIdAndBrandIdAndDate(productId, brandId, date))
         .thenReturn(Flux.just(priceEntity));
 
-    when(mapper.toModel(priceEntity))
+    when(mapper.fromPriceEntityToPrice(priceEntity))
         .thenReturn(Price.builder().id(1L).price(BigDecimal.valueOf(100.00)).build());
 
     Flux<Price> result =
@@ -213,7 +213,7 @@ public class DatabasePriceAdapterTest {
     when(repository.findAllByProductIdAndBrandId(productId, brandId))
         .thenReturn(Flux.just(priceEntity1, priceEntity2));
 
-    when(mapper.toModel(any())).thenReturn(Price.builder().build());
+    when(mapper.fromPriceEntityToPrice(any())).thenReturn(Price.builder().build());
 
     Flux<Price> results = databasePriceAdapter.findAllByProductIdAndBrandId(productId, brandId);
 
