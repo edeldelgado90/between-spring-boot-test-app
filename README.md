@@ -70,7 +70,6 @@ The application inserts the following default data into the tables upon startup 
 
 | id    | name         | description                                                                                                    |
 |-------|--------------|----------------------------------------------------------------------------------------------------------------|
-|
 | 35455 | JEANS MARINE | Jeans marine fit con cinturilla interior ajustable y cierre botón frontal. Bolsillos tipo plastrón en espalda. |
 
 ### Price List
